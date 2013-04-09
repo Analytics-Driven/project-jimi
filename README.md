@@ -3,7 +3,7 @@ project-jimi
 
 Project to do some analysis on Jimi Hendrix Data. 
 
-This is the first projct, so i'll be defining some architecture that we can re-use for other projects. 
+This is the first project, so i'll be defining an architecture that we can re-use and expand for other projects. 
 
 The main elements are: 
 
