@@ -1,132 +1,85 @@
 <!DOCTYPE html>
+<html>
+<head>
 <meta charset="utf-8">
 <script src="http://d3js.org/d3.v2.min.js?2.9.3"></script>
-<style>
-body {
-  font: 300 36px "Helvetica";
-  height: 10px;
-  margin: 50px 20px 40px 20px;
-  position: relative;
-  width: 400px;
-}
-h1 {
-  font-size: 64px;
-}
+<link type="text/css" rel="stylesheet" href="style.css"/>
 
-h1, h2, h3 {
-  font-weight: inherit;
-  margin: 0;
-}
-
-h2, h3 {
-  text-align: left;
-  font-size: inherit;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-}
-
-h2 {
-  font-size: 24px;
-  position: absolute;
-  bottom: -30px;
-  right: 120px;
-
-}
-
-h3 {
-  color: gray;
-  bottom: -10px;
-  right: -165px;
-  font-size: 60px
-}
-
-.link {
-  stroke: red;
-}
-
-.node text {
-  font: 12px sans-serif;
-}
-
-body > svg {
-  position: absolute;
-  top: 60px;
-  left: 100px;
-    background-color: #f0f0f0; 
-}
-</style>
-
+</head>
 <body>
 
 <script>
-/* surface size */
+// surface size 
 var width = 1000,
     height = 550
 
-/* create an SVG object on the page*/
+// create an SVG object on the page
 var svg = d3.select("body")
-  .append("svg")
+	.append("svg")
     .attr("width", width)
     .attr("height", height);
 
-/* instantiate a 'forced layout' layout */
+// instantiate a 'forced layout' layout 
 var force = d3.layout.force()
     .gravity(.1)
-    .distance(100)
+    .linkDistance(100)
     .charge(-750)
     .size([width, height]);
 
-/* load some data - nodes + links */
+// load some data - nodes + links 
 d3.json("jimi.json", function(jimijson) {
   force
       .nodes(jimijson.mynodes)
       .links(jimijson.mylinks)
       .start();
 
-/* add all of the links */ 
+// add all of the links 
   var link = svg.selectAll(".link")
       .data(jimijson.mylinks)
-      .enter().append("line")
+      .enter()
+      .append("line")
       .attr("class", "link")
-      .attr("stroke-width", function(d) { return d.siz }); /* d is the current instance */ 
+      .attr("stroke"      , function(d) { if (parseInt(d.weight) < 2) { return "orange"} else {return "red"} } ) 
+      .attr("stroke-width", function(d) { return d.weight } ) ; // d is the current instance  
 
-/* add all of the nodes - and start the FORCE */
-  var node = svg.selectAll(".node") /* select the empty set of all nodes */
-      .data(jimijson.mynodes)       /* add data - all mynodes */
-      .enter().append("g")			/* Enter - "pushes" the .data into the selection */
-      .attr("class", "node")
+// add all of the nodes - and start the FORCE 
+  var node = svg.selectAll(".node") // select the empty set of all nodes 
+      .data(jimijson.mynodes)       // bind data - all mynodes 
+      .enter()						// add the data into the svg  as type .node
+      .append("g")					//  Group these nodes together 
+      .attr("class", "node")		// set their css class 
       .call(force.drag);
 
-/* add images to the NODES */ 
-  node.append("image")
-      .attr("xlink:href", function(d) { return d.iconn })
+// add images to the NODES 
+  node.append("image")				// modify nodes 
+      .attr("xlink:href", function(d) { return d.imageURL })
       .attr("x", -8)
       .attr("y", -8)
       .attr("width", 16)
       .attr("height", 16);
 
-/* add labels to the NODES */
-  node.append("text")
+// add labels to the NODES 
+  node.append("text")				// modify nodes - add a text label 
       .attr("dx", 12)
       .attr("dy", ".35em")
       .text(function(d) { return d.name });
 
-/* start the FORCE working - on each TICK */
+
+// start the FORCE working - on each TICK 
   force.on("tick", function() {
     link.attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; });
 
-    /* visualize */
+    // visualize 
     node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
   });
 
+	d3.select("body").append("h3").text("analytics-driven.com"); 
+	d3.select("body").append("h2").text("jimi - associations (draft)"); 
 });
 
 </script>
-<h3>analytics-driven.com</h3>
-<h2>jimi - associations <i>(draft)</i></h2>
 </body>
 </html>
