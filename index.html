@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script src="http://d3js.org/d3.v2.min.js?2.9.3"></script>
+<style>
+body {
+  font: 300 36px "Helvetica";
+  height: 10px;
+  margin: 50px 20px 40px 20px;
+  position: relative;
+  width: 400px;
+}
+h1 {
+  font-size: 64px;
+}
+
+h1, h2, h3 {
+  font-weight: inherit;
+  margin: 0;
+}
+
+h2, h3 {
+  text-align: left;
+  font-size: inherit;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+h2 {
+  font-size: 24px;
+  position: absolute;
+  bottom: -30px;
+  right: 120px;
+
+}
+
+h3 {
+  color: gray;
+  bottom: -10px;
+  right: -165px;
+  font-size: 60px
+}
+
+.link {
+  stroke: red;
+}
+
+.node text {
+  font: 12px sans-serif;
+}
+
+body > svg {
+  position: absolute;
+  top: 60px;
+  left: 100px;
+    background-color: #f0f0f0; 
+}
+</style>
+
+<body>
+
+<script>
+/* surface size */
+var width = 1000,
+    height = 550
+
+/* create an SVG object on the page*/
+var svg = d3.select("body")
+  .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+/* instantiate a 'forced layout' layout */
+var force = d3.layout.force()
+    .gravity(.1)
+    .distance(100)
+    .charge(-750)
+    .size([width, height]);
+
+/* load some data - nodes + links */
+d3.json("jimi.json", function(jimijson) {
+  force
+      .nodes(jimijson.mynodes)
+      .links(jimijson.mylinks)
+      .start();
+
+/* add all of the links */ 
+  var link = svg.selectAll(".link")
+      .data(jimijson.mylinks)
+      .enter().append("line")
+      .attr("class", "link")
+      .attr("stroke-width", function(d) { return d.siz }); /* d is the current instance */ 
+
+/* add all of the nodes - and start the FORCE */
+  var node = svg.selectAll(".node") /* select the empty set of all nodes */
+      .data(jimijson.mynodes)       /* add data - all mynodes */
+      .enter().append("g")			/* Enter - "pushes" the .data into the selection */
+      .attr("class", "node")
+      .call(force.drag);
+
+/* add images to the NODES */ 
+  node.append("image")
+      .attr("xlink:href", function(d) { return d.iconn })
+      .attr("x", -8)
+      .attr("y", -8)
+      .attr("width", 16)
+      .attr("height", 16);
+
+/* add labels to the NODES */
+  node.append("text")
+      .attr("dx", 12)
+      .attr("dy", ".35em")
+      .text(function(d) { return d.name });
+
+/* start the FORCE working - on each TICK */
+  force.on("tick", function() {
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+    /* visualize */
+    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+  });
+
+});
+
+</script>
+<h3>analytics-driven.com</h3>
+<h2>jimi - associations <i>(draft)</i></h2>
+</body>
+</html>
